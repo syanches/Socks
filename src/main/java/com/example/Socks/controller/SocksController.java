@@ -9,7 +9,6 @@ import org.springframework.util.ObjectUtils;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
-import javax.swing.text.html.Option;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -54,20 +53,25 @@ public class SocksController {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
         }
 
-        try {
-            Optional<Socks> socksToDeleteOptional = socksRepository.findByColorAndCottonPartEquals(socks.getColor(), socks.getCottonPart()).stream().findFirst();
-            Socks socksToDelete;
-            if (socksToDeleteOptional.isPresent()) {
-                socksToDelete = socksToDeleteOptional.get();
-                socksToDelete.setQuantity(socksToDelete.getQuantity()-socks.getQuantity());
-                return socksRepository.save(socksToDelete);
-            } else {
+        Optional<Socks> socksToDeleteOptional = socksRepository.findByColorAndCottonPartEquals(socks.getColor(), socks.getCottonPart()).stream().findFirst();
+        Socks socksToDelete;
+        if (socksToDeleteOptional.isPresent()) {
+            socksToDelete = socksToDeleteOptional.get();
+            if (socksToDelete.getQuantity()-socks.getQuantity() < 0) {
                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
             }
+            socksToDelete.setQuantity(socksToDelete.getQuantity()-socks.getQuantity());
+        } else {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
+        }
+        try {
+            return socksRepository.save(socksToDelete);
+
         } catch (Exception e) {
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR);
         }
-    }
+
+        }
 
 
 
