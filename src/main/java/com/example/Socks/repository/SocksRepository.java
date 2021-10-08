@@ -1,6 +1,5 @@
 package com.example.Socks.repository;
 
-import com.example.Socks.model.Operations;
 import com.example.Socks.model.Socks;
 import org.springframework.data.repository.CrudRepository;
 
