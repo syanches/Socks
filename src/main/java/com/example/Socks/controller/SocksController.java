@@ -103,9 +103,10 @@ public class SocksController {
         }
     }
 
-    @GetMapping("/all")
-    public Iterable<Socks> getAll() {
-        return socksRepository.findAll();
-    }
+//    @GetMapping("/all")
+//    public Iterable<Socks> getAll() {
+//        return socksRepository.findAll();
+//
+//    }
 
 }
