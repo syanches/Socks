@@ -9,8 +9,10 @@ import org.springframework.util.ObjectUtils;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
+import javax.swing.text.html.Option;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @RequestMapping("/api/socks")
 @RestController
@@ -30,7 +32,16 @@ public class SocksController {
         }
 
         try {
-            return socksRepository.save(socks);
+            Optional<Socks> socksToChangeOptional = socksRepository.findByColorAndCottonPartEquals(socks.getColor(), socks.getCottonPart()).stream().findFirst();
+            Socks socksToChange;
+            if (socksToChangeOptional.isPresent()) {
+                socksToChange = socksToChangeOptional.get();
+            } else {
+                return socksRepository.save(socks);
+            }
+            socksToChange.setQuantity(socksToChange.getQuantity()+socks.getQuantity());
+
+            return socksRepository.save(socksToChange);
         } catch (Exception e) {
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR);
         }
@@ -44,7 +55,15 @@ public class SocksController {
         }
 
         try {
-            return socksRepository.save(socks);
+            Optional<Socks> socksToDeleteOptional = socksRepository.findByColorAndCottonPartEquals(socks.getColor(), socks.getCottonPart()).stream().findFirst();
+            Socks socksToDelete;
+            if (socksToDeleteOptional.isPresent()) {
+                socksToDelete = socksToDeleteOptional.get();
+                socksToDelete.setQuantity(socksToDelete.getQuantity()-socks.getQuantity());
+                return socksRepository.save(socksToDelete);
+            } else {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
+            }
         } catch (Exception e) {
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR);
         }
@@ -81,8 +100,8 @@ public class SocksController {
     }
 
     @GetMapping("/all")
-    public String getSocksCount() {
-        return String.valueOf(socksRepository.count());
+    public Iterable<Socks> getAll() {
+        return socksRepository.findAll();
     }
 
 }
